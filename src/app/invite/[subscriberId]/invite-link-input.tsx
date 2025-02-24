@@ -17,12 +17,9 @@ export function InviteLinkInput({ inviteLink }: InviteLinkInputProps) {
         <Link className="size-5" />
       </InputIcon>
 
-      <InputField
-        readOnly
-        defaultValue={'https://www.localhost:300/invite/asfasjkfhasj'}
-      />
+      <InputField readOnly defaultValue={inviteLink} />
 
-      <IconButton className="-mr-2">
+      <IconButton className="-mr-2" onClick={copyInviteLink}>
         <Copy className="size-5" />
       </IconButton>
     </InputRoot>

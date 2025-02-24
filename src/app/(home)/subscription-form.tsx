@@ -3,7 +3,9 @@ import Button from '@/components/button'
 import { InputField, InputIcon, InputRoot } from '@/components/input'
 import { ArrowRight, Mail, User } from 'lucide-react'
 
+import { subscribeToEvent } from '@/http/api'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -15,16 +17,27 @@ const subscriptionSchema = z.object({
 type SubscriptionSchema = z.infer<typeof subscriptionSchema>
 
 export function SubscriptionForm() {
+  const router = useRouter()
+  const searchParams = useSearchParams()f
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SubscriptionSchema>({
     resolver: zodResolver(subscriptionSchema),
-
   })
-  function onSubscribe(data: SubscriptionSchema) {
-    console.log(data)
+
+  async function onSubscribe({ name, email }: SubscriptionSchema) {
+    try {
+      const referrer = searchParams.get('referrer')
+
+      const { subscriberId } = await subscribeToEvent({ name, email, referrer })
+
+      router.push(`/invite/${subscriberId}`)
+    } catch (error) {
+      console.error('Subscrição com falha.')
+    }
   }
 
   return (
@@ -44,13 +57,15 @@ export function SubscriptionForm() {
             </InputIcon>
 
             <InputField
-              {...register('name')}
               type="text"
               placeholder="Nome completo"
+              {...register('name')}
             />
           </InputRoot>
           {errors.name && (
-            <p className='text-danger text-xs font-semibold'>{errors.name.message}</p>
+            <p className="text-danger text-xs font-semibold">
+              {errors.name.message}
+            </p>
           )}
         </div>
         {/* Input email para preencher */}
@@ -61,16 +76,17 @@ export function SubscriptionForm() {
             </InputIcon>
 
             <InputField
-              {...register('email')}
               type="email"
               placeholder="E-mail"
+              {...register('email')}
             />
           </InputRoot>
 
           {errors.email && (
-            <p className='text-danger text-xs font-semibold'>{errors.email.message}</p>
+            <p className="text-danger text-xs font-semibold">
+              {errors.email.message}
+            </p>
           )}
-
         </div>
       </div>
       <Button type="submit">
